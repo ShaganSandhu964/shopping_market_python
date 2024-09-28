@@ -1,0 +1,211 @@
+# Shopping App - Backend Only
+
+# Welcome message
+def welcome_message():
+    print("Welcome to the Demo Marketplace!")
+
+# User and Admin login credentials
+admin_credentials = {'admin': 'admin123'}
+user_credentials = {'user1': 'user123', 'user2': 'user234'}
+
+# Session management
+session = {'logged_in': False, 'role': None}
+
+# Product catalog (category id, name, price)
+catalog = [
+    {'product_id': 1, 'name': 'Boots', 'category': 'Footwear', 'price': 2000},
+    {'product_id': 2, 'name': 'Jacket', 'category': 'Clothing', 'price': 3000},
+    {'product_id': 3, 'name': 'Headphones', 'category': 'Electronics', 'price': 1500}
+]
+
+# Cart management
+cart = []
+
+# Function to handle user login
+def login():
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+    if username in admin_credentials and admin_credentials[username] == password:
+        session['logged_in'] = True
+        session['role'] = 'admin'
+        print("Admin logged in successfully.")
+    elif username in user_credentials and user_credentials[username] == password:
+        session['logged_in'] = True
+        session['role'] = 'user'
+        print("User logged in successfully.")
+    else:
+        print("Invalid credentials")
+
+# Function to view product catalog
+def view_catalog():
+    print("\nAvailable Products:")
+    for product in catalog:
+        print(f"ID: {product['product_id']}, Name: {product['name']}, Category: {product['category']}, Price: {product['price']}")
+
+# Function to add products to cart
+def add_to_cart(product_id, quantity):
+    for product in catalog:
+        if product['product_id'] == product_id:
+            cart.append({'product': product, 'quantity': quantity})
+            print(f"{product['name']} added to the cart.")
+            return
+    print("Product not found.")
+
+# Function to view cart contents
+def view_cart():
+    if not cart:
+        print("Your cart is empty.")
+    else:
+        print("\nYour Cart:")
+        for item in cart:
+            print(f"Product: {item['product']['name']}, Quantity: {item['quantity']}, Price: {item['product']['price'] * item['quantity']}")
+
+# Function to remove items from cart
+def remove_from_cart(product_id):
+    for item in cart:
+        if item['product']['product_id'] == product_id:
+            cart.remove(item)
+            print(f"Removed {item['product']['name']} from the cart.")
+            return
+    print("Product not found in cart.")
+
+# Function to handle payment options
+def checkout(payment_option):
+    total_amount = sum(item['product']['price'] * item['quantity'] for item in cart)
+    if payment_option == 'UPI':
+        print(f"Redirecting to UPI for payment of Rs. {total_amount}...")
+    elif payment_option == 'Debit Card':
+        print(f"Proceed to card payment for Rs. {total_amount}...")
+    print("Your order is successfully placed.")
+
+# Admin-only function to add new products to catalog
+def add_product():
+    if session['role'] == 'admin':
+        product_id = len(catalog) + 1
+        name = input("Enter product name: ")
+        category = input("Enter product category: ")
+        price = int(input("Enter product price: "))
+        catalog.append({'product_id': product_id, 'name': name, 'category': category, 'price': price})
+        print(f"Product '{name}' added successfully.")
+    else:
+        print("Only admin can add products.")
+
+# Admin-only function to remove products from catalog
+def remove_product():
+    if session['role'] == 'admin':
+        product_id = int(input("Enter product ID to remove: "))
+        for product in catalog:
+            if product['product_id'] == product_id:
+                catalog.remove(product)
+                print(f"Product '{product['name']}' removed from catalog.")
+                return
+        print("Product not found.")
+    else:
+        print("Only admin can remove products.")
+
+# Admin-only function to update products in catalog
+def update_product():
+    if session['role'] == 'admin':
+        product_id = int(input("Enter product ID to update: "))
+        for product in catalog:
+            if product['product_id'] == product_id:
+                new_name = input(f"Enter new name for {product['name']} (or press Enter to keep the same): ")
+                new_price = input(f"Enter new price for {product['price']} (or press Enter to keep the same): ")
+                if new_name:
+                    product['name'] = new_name
+                if new_price:
+                    product['price'] = int(new_price)
+                print(f"Product '{product['name']}' updated successfully.")
+                return
+        print("Product not found.")
+    else:
+        print("Only admin can update products.")
+
+# Admin-only function to add or remove categories
+def add_category():
+    if session['role'] == 'admin':
+        category = input("Enter new category name: ")
+        print(f"Category '{category}' added.")
+    else:
+        print("Only admin can add categories.")
+
+def remove_category():
+    if session['role'] == 'admin':
+        category = input("Enter category name to remove: ")
+        print(f"Category '{category}' removed.")
+    else:
+        print("Only admin can remove categories.")
+
+# Main function to run the application
+def run_shopping_app():
+    welcome_message()
+    login()
+
+    if session['logged_in']:
+        while True:
+            if session['role'] == 'user':
+                print("\nUser Menu:")
+                print("1. View Product Catalog")
+                print("2. Add to Cart")
+                print("3. View Cart")
+                print("4. Remove from Cart")
+                print("5. Checkout")
+                print("6. Logout")
+
+                choice = int(input("Enter your choice: "))
+
+                if choice == 1:
+                    view_catalog()
+                elif choice == 2:
+                    product_id = int(input("Enter product ID to add to cart: "))
+                    quantity = int(input("Enter quantity: "))
+                    add_to_cart(product_id, quantity)
+                elif choice == 3:
+                    view_cart()
+                elif choice == 4:
+                    product_id = int(input("Enter product ID to remove from cart: "))
+                    remove_from_cart(product_id)
+                elif choice == 5:
+                    payment_option = input("Enter payment option (UPI/Debit Card): ")
+                    checkout(payment_option)
+                    break
+                elif choice == 6:
+                    print("Logging out...")
+                    session['logged_in'] = False
+                    break
+                else:
+                    print("Invalid choice.")
+
+            elif session['role'] == 'admin':
+                print("\nAdmin Menu:")
+                print("1. View Product Catalog")
+                print("2. Add New Product")
+                print("3. Update Product")
+                print("4. Remove Product")
+                print("5. Add Category")
+                print("6. Remove Category")
+                print("7. Logout")
+
+                choice = int(input("Enter your choice: "))
+
+                if choice == 1:
+                    view_catalog()
+                elif choice == 2:
+                    add_product()
+                elif choice == 3:
+                    update_product()
+                elif choice == 4:
+                    remove_product()
+                elif choice == 5:
+                    add_category()
+                elif choice == 6:
+                    remove_category()
+                elif choice == 7:
+                    print("Logging out...")
+                    session['logged_in'] = False
+                    break
+                else:
+                    print("Invalid choice.")
+
+# Run the shopping app
+run_shopping_app()
